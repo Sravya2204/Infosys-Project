@@ -1,0 +1,5 @@
+pip install fastapi uvicorn
+pip install "pydantic"  # usually comes with FastAPI
+pip install "python-multipart"  # if needed
+pip install "fastapi[all]"  # optional for extra features
+pip install "requests"  # if fetching external API
