@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Video Search</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 30px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #d32f2f;
+      font-size: 32px;
+    }
+
+    .search-box {
+      margin-top: 20px;
+    }
+
+    input {
+      width: 60%;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      margin-left: 10px;
+      border: none;
+      background-color: #d32f2f;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #b71c1c;
+    }
+
+    #results {
+      margin-top: 40px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .video-card {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin: 15px;
+      width: 300px;
+      text-align: left;
+      overflow: hidden;
+      transition: 0.2s;
+    }
+
+    .video-card:hover {
+      transform: scale(1.02);
+    }
+
+    .video-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .video-card h3 {
+      font-size: 18px;
+      margin: 10px;
+      color: #333;
+    }
+
+    .video-card p {
+      font-size: 14px;
+      color: #555;
+      margin: 0 10px 10px 10px;
+    }
+
+    .video-card a {
+      display: block;
+      text-decoration: none;
+      color: #1976d2;
+      margin: 10px;
+      font-weight: bold;
+    }
+
+    .loading {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #444;
+    }
+
+    .error {
+      color: red;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🎬 YouTube Video Search</h1>
+
+  <div class="search-box">
+    <input type="text" id="query" placeholder="Type your query here..." />
+    <button onclick="searchVideos()">Search</button>
+  </div>
+
+  <div id="results"></div>
+
+  <script>
+    async function searchVideos() {
+      const query = document.getElementById("query").value.trim();
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "<p class='loading'>🔎 Searching videos...</p>";
+
+      if (!query) {
+        resultsDiv.innerHTML = "<p class='error'>Please enter a search term.</p>";
+        return;
+      }
+
+      try {
+        // 🔗 Replace this with your backend URL
+        const backendUrl = "http://127.0.0.1:8000";
+
+        // or your ngrok link like:
+        // const backendUrl = "https://angelic-wombat-nice.ngrok-free.dev/search";
+
+
+        const response = await fetch(backendUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query }),
+        });
+
+        if (!response.ok) {
+          resultsDiv.innerHTML = "<p class='error'>⚠️ Error fetching results. Check backend connection.</p>";
+          return;
+        }
+
+        const data = await response.json();
+        resultsDiv.innerHTML = "";
+
+        if (data.length === 0) {
+          resultsDiv.innerHTML = "<p>No results found.</p>";
+          return;
+        }
+
+        data.forEach((video) => {
+          const card = document.createElement("div");
+          card.className = "video-card";
+          card.innerHTML = `
+            <img src="${video.thumbnail}" alt="Thumbnail" />
+            <h3>${video.title}</h3>
+            <p>${video.description}</p>
+            <a href="${video.link}" target="_blank">▶ Watch on YouTube</a>
+          `;
+          resultsDiv.appendChild(card);
+        });
+      } catch (error) {
+        console.error(error);
+        resultsDiv.innerHTML = "<p class='error'>❌ Failed to fetch videos. Backend might be offline.</p>";
+      }
+    }
+  </script>
+</body>
+</html>
